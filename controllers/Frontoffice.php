@@ -3620,6 +3620,62 @@ class Frontoffice extends CI_Controller {
 				$coba[$key][4]=' readonly ';
 			}
 
+			#perbaikan 26 agustus 2020
+			/**
+			 * Filosofi di fungsi verifikasi ini, admin boleh membaca saja, tetapi
+			 * - bisa menentukan status surat 
+			 * - bisa mengarahkan kemana surat 
+			 * - bisa menambahkan keterangan dan 
+			 * - bisa menentukan urgensi surat
+			 * Selain itu semuanya readonly.
+			 * Juga bahwa sembunyikan beberapa kolom yang memusingkan admin.
+			 */
+
+			#perbaikan 25 agustus 2020
+			//Hilangkan kolom-kolom yang memusingkan admin.
+			$coba[1][0]='hidden';
+			$coba[22][0]='hidden';
+			$coba[23][0]='hidden';
+			$coba[24][0]='hidden';
+			$coba[25][0]='hidden';
+			$coba[26][0]='hidden';
+			$coba[27][0]='hidden';
+			$coba[30][0]='hidden';
+			
+			#perbaikan 26 agustus 2020
+			#START
+
+			//Buka agar admin bisa menambahkan keterangan.
+			$coba[19][4]=''; 
+			$coba[19][0]='area';
+
+			//Buka agar admin bisa memberitahu sekretariat surat mau diarahkan kemana.
+			$coba[18][4]=''; 
+			$coba[18][8]='Sekretariat '.$this->config->item('nama_opd').'';
+			$coba[18][6]='<b>Diteruskan ke</b>';
+			$coba[18][0]='combo_database';
+			$coba[18][7]=array("target","target",'target_surat'); //inshaa Allah gunakan ini sekarang untuk mendefinisikan combo_database, soalnya core sudah dirubah.
+			
+			//Buka agar admin bisa menambahkan status surat.
+			$coba[20][4]='';
+			$coba[20][0]='combo_database';
+			$coba[20][7]=array("nama_status","nama_status",'status_surat');
+
+			//timestamp masuk
+			$coba[21][7]='dibaca';
+			$coba[21][7]=implode("-",array (date("d/m/Y"),mt_rand (1000,9999),microtime()));
+
+			//posisi surat terakhir
+			$coba[27][7]='Sekretariat BPSDM';
+
+			//Urgensi surat, dibuka agar admin bisa menyatakan urgensinya
+			$coba[29][4]='';
+			$coba[29][0]='combo_database';
+			$coba[29][7]=array("nama_urgensi_surat","nama_urgensi_surat",'urgensi_surat'); //inshaa Allah gunakan ini sekarang untuk mendefinisikan combo_database, soalnya core sudah dirubah.
+			$coba[29][8]=$surat[0][28]; //inshaa Allah gunakan ini sekarang untuk mendefinisikan combo_database, soalnya core sudah dirubah.
+			
+			#END
+			/*
 			$coba[18][7]='Sekretariat '.$this->config->item('nama_opd').'';
 			$coba[20][7]='dibaca';
 			$coba[22][7]=implode("-",array (date("d/m/Y"),mt_rand (1000,9999),microtime()));
@@ -3636,7 +3692,7 @@ class Frontoffice extends CI_Controller {
 			$coba[18][6]='<b>Diteruskan ke</b>';
 			$coba[18][0]='combo_database';
 			$coba[18][7]=array("target","target",'target_surat'); //inshaa Allah gunakan ini sekarang untuk mendefinisikan combo_database, soalnya core sudah dirubah.
-			
+			*/
 
 			$komponen=$coba;
 			$atribut_form='';
