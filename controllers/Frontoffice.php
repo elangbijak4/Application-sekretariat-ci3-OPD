@@ -2112,8 +2112,245 @@ class Frontoffice extends CI_Controller {
 		*/
 		
 	}
-
+	
 	public function terima_penambahan_foto_video_surat($table='tbagenda_kerja',$nama_kolom='idagenda_kerja',$nilai_kolom=NULL){
+		//Cek dulu nilai modal:
+		$flag_9001=$this->session->userdata('flag_9001');
+		if($flag_9001!==NULL){
+
+			
+			/**
+			 * Bagian upload semua file
+			 */
+			$nama_komponen_tambahan_total=$this->session->userdata('data_nama_tambahan');
+			$directory_relatif_file_upload_surat='./public/arsip_surat_agenda/';
+			$directory_relatif_file_upload_foto='./public/arsip_foto_agenda/';		
+			$directory_relatif_file_upload_video='./public/arsip_video_agenda/';		
+
+			
+			//print_r($nama_komponen_tambahan_total);
+			if($nama_komponen_tambahan_total!==NULL){
+				foreach($nama_komponen_tambahan_total as $key=>$nama){
+					//preg_grep("#nama_file_surat_pendukung#i",array($nama))?
+					if(preg_grep("#foto#i",array($nama))) $upload_array[$nama]=upload($nama, $folder=$directory_relatif_file_upload_foto, $types="ogg,mp4,mp3,wav,mov,vid,pdf,jpeg,gif,png,doc,docs,bbc,docx,xls,xlsx,ppt,pptx,txt,sql,csv,xml,json,rar,zip,bmp,jpg,htm,html");
+					else if(preg_grep("#video#i",array($nama))) $upload_array[$nama]=upload($nama, $folder=$directory_relatif_file_upload_video, $types="ogg,mp4,mp3,wav,mov,vid,pdf,jpeg,gif,png,doc,docs,docx,xls,bbc,xlsx,ppt,pptx,txt,sql,csv,xml,json,rar,zip,bmp,jpg,htm,html");
+					else $upload_array[$nama]=upload($nama, $folder=$directory_relatif_file_upload_surat, $types="ogg,pdf,png,jpg,wav,mov,mp4,gif,bmp,vid,mp3,sql,txt,pdf,doc,docs,docx,xls,bbc,xlsx,ppt,pptx,rar,zip,htm,html,sql,csv,xml,json");
+				}
+			}
+
+			
+			//Buat daftar nama file yang hendak disimpan:
+			$list_nama_file_surat=array();
+			$list_nama_file_foto=array();
+			$list_nama_file_video=array();
+
+			if($nama_komponen_tambahan_total!==NULL){
+				foreach($nama_komponen_tambahan_total as $key=>$nama){
+					if(preg_grep("#foto#i",array($nama))) {
+						array_push($list_nama_file_foto,$upload_array[$nama][0]);
+					}else if(preg_grep("#video#i",array($nama))) {
+						array_push($list_nama_file_video,$upload_array[$nama][0]);
+					}else{
+						array_push($list_nama_file_surat,$upload_array[$nama][0]);
+					}
+				}
+			}
+
+			//Buat semua array nama sebagai string nama:
+			$list_nama_file_surat_string=implode('; ',$list_nama_file_surat);
+			$list_nama_file_foto_string=implode('; ',$list_nama_file_foto);
+			$list_nama_file_video_string=implode('; ',$list_nama_file_video);
+
+
+			//Buat daftar jejak direktori:
+			$list_direktori_surat=array();
+			$list_direktori_foto=array();
+			$list_direktori_video=array();//ghgh
+
+			if($nama_komponen_tambahan_total!==NULL){
+				if($nama_komponen_tambahan_total!==array()||$nama_komponen_tambahan_total!==NULL){
+					foreach($nama_komponen_tambahan_total as $key=>$nama){
+						if(preg_grep("#foto#i",array($nama))) $upload_array[$nama][0]!==''?array_push($list_direktori_foto,$directory_relatif_file_upload_foto.$upload_array[$nama][0]):NULL;
+						else if(preg_grep("#video#i",array($nama))) $upload_array[$nama][0]!==''?array_push($list_direktori_video,$directory_relatif_file_upload_video.$upload_array[$nama][0]):NULL;
+						else $upload_array[$nama][0]!==''?array_push($list_direktori_surat,$directory_relatif_file_upload_surat.$upload_array[$nama][0]):NULL;
+					}//okok1
+				}
+			}
+
+			//Buat semua array list direktori sebagai string nama:
+			$list_direktori_surat_string=implode('; ',$list_direktori_surat);
+			$list_direktori_foto_string=implode('; ',$list_direktori_foto);
+			$list_direktori_video_string=implode('; ',$list_direktori_video);
+			
+			/**
+			 * Untuk bagian baca sebelumnya di basisdata lalu tambahkan dengan hasil penambahan di atas
+			 * lalu simpan perubahan di basisdata
+			 */
+			//Akses nama-nama foto sebelumnya:
+			$kolom_rujukan['nama_kolom']=$nama_kolom;
+			$kolom_rujukan['nilai']=$nilai_kolom;
+			$kolom_target='nama_file_foto';
+			$serial_nama_file_foto_sebelumnya=$this->model_frommyframework->pembaca_nilai_kolom_tertentu($table,$kolom_rujukan,$kolom_target);
+			//Tambahkan dengan nama-nama foto baru:
+			$serial_nama_file_foto_sebelumnya[0]!==''?$serial_nama_file_foto_gabungan=trim(implode('; ',array($list_nama_file_foto_string,$serial_nama_file_foto_sebelumnya[0])),'; ')
+			:$serial_nama_file_foto_gabungan=trim($list_nama_file_foto_string,'; ');
+
+			//Akses list direktori foto sebelumnya:
+			$kolom_rujukan['nama_kolom']=$nama_kolom;
+			$kolom_rujukan['nilai']=$nilai_kolom;
+			$kolom_target='direktori_foto_yg_menyertai';
+			$serial_list_file_foto_sebelumnya=$this->model_frommyframework->pembaca_nilai_kolom_tertentu($table,$kolom_rujukan,$kolom_target);
+			//Tambahkan dengan nama-nama direktori foto baru:
+			$tes=explode('/',$serial_list_file_foto_sebelumnya[0]);
+			//if($tes[sizeof($tes)-1]!=='' || $serial_list_file_foto_sebelumnya[0]!==''){
+				$serial_list_file_foto_sebelumnya[0]!==''&&$tes[sizeof($tes)-1]!==''?$serial_list_file_foto_gabungan=trim(implode('; ',array($list_direktori_foto_string,$serial_list_file_foto_sebelumnya[0])),'; ')
+				:$serial_list_file_foto_gabungan=trim($list_direktori_foto_string,'; ');
+			//}
+
+			//Akses nama-nama video sebelumnya:
+			$kolom_rujukan['nama_kolom']=$nama_kolom;
+			$kolom_rujukan['nilai']=$nilai_kolom;
+			$kolom_target='nama_file_video';
+			$serial_nama_file_video_sebelumnya=$this->model_frommyframework->pembaca_nilai_kolom_tertentu($table,$kolom_rujukan,$kolom_target);
+			//Tambahkan dengan nama-nama video baru:
+			$serial_nama_file_video_sebelumnya[0]!==''?$serial_nama_file_video_gabungan=trim(implode('; ',array($list_nama_file_video_string,$serial_nama_file_video_sebelumnya[0])),'; ')
+			:$serial_nama_file_video_gabungan=trim($list_nama_file_video_string,'; ');
+
+			//Akses list direktori video sebelumnya:
+			$kolom_rujukan['nama_kolom']=$nama_kolom;
+			$kolom_rujukan['nilai']=$nilai_kolom;
+			$kolom_target='direktori_video_yang_menyertai';
+			$serial_list_file_video_sebelumnya=$this->model_frommyframework->pembaca_nilai_kolom_tertentu($table,$kolom_rujukan,$kolom_target);
+			//Tambahkan dengan nama-nama direktori video baru:
+			$tes=explode('/',$serial_list_file_video_sebelumnya[0]);
+			$serial_list_file_video_sebelumnya[0]!==''&&$tes[sizeof($tes)-1]!==''?$serial_list_file_video_gabungan=trim(implode('; ',array($list_direktori_video_string,$serial_list_file_video_sebelumnya[0])),'; ')
+			:$serial_list_file_video_gabungan=trim($list_direktori_video_string,'; ');
+
+			//Akses nama-nama surat sebelumnya:
+			$kolom_rujukan['nama_kolom']=$nama_kolom;
+			$kolom_rujukan['nilai']=$nilai_kolom;
+			$kolom_target='nama_file_surat_pendukung';
+			$serial_nama_file_surat_sebelumnya=$this->model_frommyframework->pembaca_nilai_kolom_tertentu($table,$kolom_rujukan,$kolom_target);
+			//Tambahkan dengan nama-nama surat baru:
+			$serial_nama_file_surat_sebelumnya[0]!==''?$serial_nama_file_surat_gabungan=trim(implode('; ',array($list_nama_file_surat_string,$serial_nama_file_surat_sebelumnya[0])),'; ')
+			:$serial_nama_file_surat_gabungan=trim($list_nama_file_surat_string,'; ');
+
+			//Akses list direktori surat sebelumnya:
+			$kolom_rujukan['nama_kolom']=$nama_kolom;
+			$kolom_rujukan['nilai']=$nilai_kolom;
+			$kolom_target='direktori_surat_pendukung';
+			$serial_list_file_surat_sebelumnya=$this->model_frommyframework->pembaca_nilai_kolom_tertentu($table,$kolom_rujukan,$kolom_target);
+			//Tambahkan dengan nama-nama direktori surat baru:
+			$tes=explode('/',$serial_list_file_surat_sebelumnya[0]);
+			$serial_list_file_surat_sebelumnya[0]!==''&&$tes[sizeof($tes)-1]!==''?$serial_list_file_surat_gabungan=trim(implode('; ',array($list_direktori_surat_string,$serial_list_file_surat_sebelumnya[0])),'; ')
+			:$serial_list_file_surat_gabungan=trim($list_direktori_surat_string,'; ');
+
+			/*
+			//tes:
+			echo "<br>list_nama_file_surat_string: <br>";
+			echo($list_nama_file_surat_string);
+			echo "<br>list_nama_file_foto_string:<br>";
+			echo($list_nama_file_foto_string);
+			echo "<br>list_nama_file_video_string:<br>";
+			echo($list_nama_file_video_string);
+			echo "<br><br>";
+			echo "<br>list_direktori_surat_string: <br>";
+			echo($list_direktori_surat_string);
+			echo "<br>list_direktori_foto_string:<br>";
+			echo($list_direktori_foto_string);
+			echo "<br>list_direktori_video_string:<br>";
+			echo($list_direktori_video_string);
+			echo "<br><br>";
+			echo "serial_nama_file_foto_gabungan:<br>";
+			echo($serial_nama_file_foto_gabungan);
+			echo "<br><br>";
+			echo "serial_nama_file_video_gabungan:<br>";
+			echo($serial_nama_file_video_gabungan);
+			echo "<br><br>";
+			echo "serial_nama_file_surat_gabungan:<br>";
+			echo($serial_nama_file_surat_gabungan);
+			echo "<br><br>";
+			echo "serial_list_file_foto_gabungan:<br>";
+			echo($serial_list_file_foto_gabungan);
+			echo "<br><br>";
+			echo "serial_list_file_video_gabungan:<br>";
+			echo($serial_list_file_video_gabungan);
+			echo "<br><br>";
+			echo "serial_list_file_surat_gabungan:<br>";
+			echo($serial_list_file_surat_gabungan);
+			*/
+
+			/**
+			 * Lakukan penyimpanan di basisdata sekarang, penyimpanan hanya untuk nama2 file dan direktorinya.
+			 */
+			$flag=0;
+			//Update nama-nama foto
+			$kolom_rujukan['nama_kolom']=$nama_kolom;
+			$kolom_rujukan['nilai']=$nilai_kolom;
+			$kolom_target='nama_file_foto';
+			$data[$kolom_target]=$serial_nama_file_foto_gabungan;
+			$okfoto=$this->model_frommyframework->update_style_CI_no_alert($table,$kolom_rujukan,$data);
+			!$okfoto?alert('Pencatatan penyimpanan direktori foto gagal'):$flag++;
+
+			//Update nama-nama video
+			$kolom_rujukan['nama_kolom']=$nama_kolom;
+			$kolom_rujukan['nilai']=$nilai_kolom;
+			$kolom_target='nama_file_video';
+			$data[$kolom_target]=$serial_nama_file_video_gabungan;
+			$okdirfoto=$this->model_frommyframework->update_style_CI_no_alert($table,$kolom_rujukan,$data);
+			!$okdirfoto?alert('Pencatatan penyimpanan direktori video gagal'):$flag++;
+
+			//Update nama-nama surat
+			$kolom_rujukan['nama_kolom']=$nama_kolom;
+			$kolom_rujukan['nilai']=$nilai_kolom;
+			$kolom_target='nama_file_surat_pendukung';
+			$data[$kolom_target]=$serial_nama_file_surat_gabungan;
+			$okvideo=$this->model_frommyframework->update_style_CI_no_alert($table,$kolom_rujukan,$data);
+			!$okvideo?alert('Pencatatan penyimpanan direktori surat gagal'):$flag++;
+
+			//Update list ditektori foto
+			$kolom_rujukan['nama_kolom']=$nama_kolom;
+			$kolom_rujukan['nilai']=$nilai_kolom;
+			$kolom_target='direktori_foto_yg_menyertai';
+			$data[$kolom_target]=$serial_list_file_foto_gabungan;
+			$okdirvideo=$this->model_frommyframework->update_style_CI_no_alert($table,$kolom_rujukan,$data);
+			!$okdirvideo?alert('Pencatatan penyimpanan direktori foto gagal'):$flag++;
+
+			//Update list ditektori video
+			$kolom_rujukan['nama_kolom']=$nama_kolom;
+			$kolom_rujukan['nilai']=$nilai_kolom;
+			$kolom_target='direktori_video_yang_menyertai';
+			$data[$kolom_target]=$serial_list_file_video_gabungan;
+			$oksurat=$this->model_frommyframework->update_style_CI_no_alert($table,$kolom_rujukan,$data);
+			!$oksurat?alert('Pencatatan penyimpanan direktori video gagal'):$flag++;
+
+			//Update list ditektori surat
+			$kolom_rujukan['nama_kolom']=$nama_kolom;
+			$kolom_rujukan['nilai']=$nilai_kolom;
+			$kolom_target='direktori_surat_pendukung';
+			$data[$kolom_target]=$serial_list_file_surat_gabungan;
+			$okdirsurat=$this->model_frommyframework->update_style_CI_no_alert($table,$kolom_rujukan,$data);
+			!$okdirsurat?alert('Pencatatan penyimpanan direktori surat gagal'):$flag++;
+
+			$flag==6?alert("Penambahan file sukses"):alert("Penambahan file gagal seluruhnya atau sebagian");
+			/**
+			 * Ini bagian kode untuk mencegah eksekusi kode saat refresh halaman
+			 */
+			$this->session->set_userdata('flag_9001',NULL);
+
+		}
+		
+		/**
+		 * Agar kembali ke halaman semula
+		 */
+		$this->session->set_userdata('modal','ok_new2');
+		//$this->session->set_userdata('flag_9001','ok');
+		$this->session->set_userdata('tabel',$table);
+		$this->load->view('admin_frontoffice/dashboard');
+
+	}
+
+	public function terima_penambahan_foto_video_surat_OLD($table='tbagenda_kerja',$nama_kolom='idagenda_kerja',$nilai_kolom=NULL){
 		//Cek dulu nilai modal:
 		$flag_9001=$this->session->userdata('flag_9001');
 		if($flag_9001!==NULL){
@@ -2347,6 +2584,72 @@ class Frontoffice extends CI_Controller {
 	}
 
 	public function unggah_file_baru_9001($table='tbagenda_kerja',$nama_kolom='idagenda_kerja',$nilai_kolom=NULL){
+		$this->session->set_userdata('flag_9001','ok');
+		$acak=date("dmY").mt_rand(1000,9999);
+		$this->session->set_userdata('data_nama_tambahan',array('0'=>'foto'.$acak,'1'=>'video'.$acak,'2'=>'surat'.$acak));
+		if($nilai_kolom!==NULL){
+			//target='target_tambah_foto_video_surat$acak'
+			echo "
+			<style>
+			#video$acak{
+				display:none;
+			}
+			#surat$acak{
+				display:none;
+			}
+			</style>
+			<form method='post' enctype='multipart/form-data' action='".site_url('Frontoffice/terima_penambahan_foto_video_surat/'.$table.'/'.$nama_kolom.'/'.$nilai_kolom)."'>
+				<div class='form-group' align=left>
+				<label for='sel1'>Tambahkan Foto:</label>
+				<div align='center'>";$this->viewfrommyframework->buat_komponen_form('multi-file','foto'.$acak,$class='d-sm-inline-block btn btn-sm btn-info shadow-sm',$id='foto'.$acak,'','','','','','','','','','');
+				//$this->buat_komponen_form_controller($type='button_ajax',$nama_komponen='text1',$class='btn btn-warning',$id='text1',$atribut='',$event='',$label='',$value='Button Ajax',$value_selected_combo='',$submenu='pilihan',$aksi='tambah',$perekam_id_untuk_button_ajax);
+				//$this->viewfrommyframework->buat_komponen_form('multi-file',$nama_komponen.$i,$class,$id.$i,'','','','','','','','','','');
+			echo "
+				</div>
+			</div>
+				<hr/>
+				<div align='right'>
+				<button type='button' style='width:50px;' class=\"d-sm-inline-block btn btn-sm btn-info shadow-sm\" id=\"show_video$acak\" >+ <i class='fas fa-video fa-sm text-white-100'></i></button>
+				<button type='button' style='width:50px;' class=\"d-sm-inline-block btn btn-sm btn-info shadow-sm\" id=\"show_surat$acak\" >+ <i class='fas fa-envelope fa-sm text-white-100'></i></button>
+				</div>
+				<div class='form-group' id='video$acak' align=left>
+				<label for='sel2'>Tambahkan Video:</label>
+				<div align='center'>";
+				$this->viewfrommyframework->buat_komponen_form('multi-file','video'.$acak,$class='d-sm-inline-block btn btn-sm btn-info shadow-sm',$id='video'.$acak,'','','','','','','','','','');
+			echo "
+				</div>
+			</div>
+				<hr/>
+				<div class='form-group surat' id='surat$acak' align=left>
+				<label for='sel3'>Tambahkan Surat:</label>
+				<div align='center'>";
+				$this->viewfrommyframework->buat_komponen_form('multi-file','surat'.$acak,$class='d-sm-inline-block btn btn-sm btn-info shadow-sm',$id='surat'.$acak,'','','','','','','','','','');
+			echo "
+			</div>
+			</div>	
+			<button type='submit' id='submit_foto_video_surat$acak' name='submit_foto_video_surat$acak' style='width:100%; margin-top:20px;' class=\"btn btn-sm btn-danger shadow-sm\" id=\"show_surat\" ><i class='fas fa-upload fa-sm text-white-100'></i>  Unggah File Sekarang</button>
+			</form>
+			<!--<iframe name='target_tambah_foto_video_surat$acak' id='targetagenda$acak' width='100%' height='250px' frameborder=''></iframe>
+			-->
+			
+			<script>
+			
+			$(document).ready(function(){
+				$(\"#show_video$acak\").click(function(){
+					$(\"#video$acak\").toggle(1000);
+				});
+				$(\"#show_surat$acak\").click(function(){
+					$(\"#surat$acak\").toggle(1000);
+				});
+	
+			});
+			</script>
+			";
+		}else{
+		}
+	}
+
+	public function unggah_file_baru_9001_OLD($table='tbagenda_kerja',$nama_kolom='idagenda_kerja',$nilai_kolom=NULL){
 		$this->session->set_userdata('flag_9001','ok');
 		$acak=date("dmY").mt_rand(1000,9999);
 		$this->session->set_userdata('data_nama_tambahan',array('0'=>'foto'.$acak,'1'=>'video'.$acak,'2'=>'surat'.$acak));
@@ -3296,7 +3599,7 @@ class Frontoffice extends CI_Controller {
 				  var limit=$(\"#quantity\").val();
                   tampilkan.hide();
                   loading.fadeIn(); 
-                  $.post('".site_url("/Frontoffice/tampil_tabel_cruid_new/".$table."/".$nama_kolom_id."/desc/")."'+limit,{ data:\"okbro\"},
+                  $.post('".site_url("/Frontoffice/tampil_tabel_cruid_new_verifikasi/".$table."/".$nama_kolom_id."/desc/")."'+limit,{ data:\"okbro\"},
                   function(data,status){
                     loading.fadeOut();
                     tampilkan.html(data);
@@ -3354,7 +3657,7 @@ class Frontoffice extends CI_Controller {
 							var limit=$(\"#quantity\").val();
 							tampilkan.hide();
 							loading.fadeIn(); 
-							$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+$current_pagePrevious+'/'+$page_awalPrevious+'/'+$jumlah_page_tampil,{ data:\"okbro\"},
+							$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new_verifikasi/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+$current_pagePrevious+'/'+$page_awalPrevious+'/'+$jumlah_page_tampil,{ data:\"okbro\"},
 							function(data,status){
 								loading.fadeOut();
 								tampilkan.html(data);
@@ -3385,7 +3688,7 @@ class Frontoffice extends CI_Controller {
 						var limit=$(\"#quantity\").val();
 						tampilkan.hide();
 						loading.fadeIn(); 
-						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+$i+'/'+$page_awal+'/'+$jumlah_page_tampil,{ data:\"okbro\"},
+						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new_verifikasi/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+$i+'/'+$page_awal+'/'+$jumlah_page_tampil,{ data:\"okbro\"},
 						function(data,status){
 							loading.fadeOut();
 							tampilkan.html(data);
@@ -3408,7 +3711,7 @@ class Frontoffice extends CI_Controller {
 						var limit=$(\"#quantity\").val();
 						tampilkan.hide();
 						loading.fadeIn(); 
-						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+$i+'/'+$page_awal+'/'+$jumlah_page_tampil,{ data:\"okbro\"},
+						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new_verifikasi/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+$i+'/'+$page_awal+'/'+$jumlah_page_tampil,{ data:\"okbro\"},
 						function(data,status){
 							loading.fadeOut();
 							tampilkan.html(data);
@@ -3442,7 +3745,7 @@ class Frontoffice extends CI_Controller {
 						var limit=$(\"#quantity\").val();
 						tampilkan.hide();
 						loading.fadeIn(); 
-						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+$current_page+'/'+$page_awal+'/'+$jumlah_page_tampil,{ data:\"okbro\"},
+						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new_verifikasi/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+$current_page+'/'+$page_awal+'/'+$jumlah_page_tampil,{ data:\"okbro\"},
 						function(data,status){
 							loading.fadeOut();
 							tampilkan.html(data);
@@ -3511,7 +3814,7 @@ class Frontoffice extends CI_Controller {
 						var jumlah_page_tampil=$jumlah_page_tampil;
 						tampilkan.hide();
 						loading.fadeIn(); 
-						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+page+'/'+page_awal+'/'+jumlah_page_tampil,{ data:\"okbro\"},
+						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new_verifikasi/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+page+'/'+page_awal+'/'+jumlah_page_tampil,{ data:\"okbro\"},
 						function(data,status){
 							loading.fadeOut();
 							tampilkan.html(data);
@@ -3579,7 +3882,7 @@ class Frontoffice extends CI_Controller {
 
 						tampilkan.hide();
 						loading.fadeIn(); 
-						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+page+'/'+page_awal+'/'+jumlah_page_tampil+'/TRUE/'+kolom_cari+'/'+nilai_kolom_cari,{ data:\"okbro\"},
+						$.post('".site_url("/Frontoffice/tampil_tabel_cruid_new_verifikasi/".$table."/".$nama_kolom_id."/desc/")."'+limit+'/'+page+'/'+page_awal+'/'+jumlah_page_tampil+'/TRUE/'+kolom_cari+'/'+nilai_kolom_cari,{ data:\"okbro\"},
 						function(data,status){
 							loading.fadeOut();
 							tampilkan.html(data);
@@ -7813,6 +8116,18 @@ class Frontoffice extends CI_Controller {
 	}
 	
 	public function tambah_file(){
+		$i=$this->session->userdata('i');
+		$class=$this->enkripsi->HexToStr($_POST['class']);
+		$id=$this->enkripsi->HexToStr($_POST['id']);
+		$nama_komponen=$this->enkripsi->HexToStr($_POST['nama_komponen']);
+		$nama_komponen_tambahan_total=array();
+		$this->session->userdata('data_nama_tambahan')!==NULL?$nama_komponen_tambahan_total=$this->session->userdata('data_nama_tambahan'):NULL;
+		array_push($nama_komponen_tambahan_total,$nama_komponen.$i);
+		$this->session->set_userdata('data_nama_tambahan',$nama_komponen_tambahan_total);
+		$this->viewfrommyframework->buat_komponen_form('multi-file',$nama_komponen.$i,$class,$id.$i,'','','','','','','','','','');
+        //deskripsi $komponen=array($type 0,$nama_komponen 1,$class 2,$id 3,$atribut 4,$event 5,$label 6,$nilai_awal_atau_nilai_combo 7. $selected 8)
+	}
+	public function tambah_file_OLD(){
 		$i=$this->session->userdata('i');
 		$class=$this->enkripsi->HexToStr($_POST['class']);
 		$id=$this->enkripsi->HexToStr($_POST['id']);
@@ -13977,7 +14292,7 @@ class Frontoffice extends CI_Controller {
 				$kiriman=array_merge(array(0=>NULL),$buffer);
 				if($terusan==NULL){
 					$tabel='surat_masuk';
-					$hasil_insersi_surat_berkas=$this->general_insertion_controller($kiriman,$tabel);//ggg3
+					$hasil_insersi_surat_berkas=$this->general_insertion_controller_baru($kiriman,$tabel);//ggg3
 					if($hasil_insersi_surat_berkas){
 						$counter_table='tbcounter_notifikasi';
 						$kolom_rujukan['nama_kolom']='idcounter_notifikasi';
@@ -13987,7 +14302,7 @@ class Frontoffice extends CI_Controller {
 					}
 				}else{
 					$tabel='surat_terusan';
-					$hasil_insersi_surat_berkas=$this->general_insertion_controller($kiriman,$tabel);//ggg3
+					$hasil_insersi_surat_berkas=$this->general_insertion_controller_baru($kiriman,$tabel);//ggg3
 					if($hasil_insersi_surat_berkas){
 						$counter_table='tbcounter_notifikasi';
 						$kolom_rujukan['nama_kolom']='idcounter_notifikasi';
@@ -14000,7 +14315,7 @@ class Frontoffice extends CI_Controller {
 				//print_r($kiriman);
 				//$hasil_insersi_surat_berkas=$this->general_insertion_controller($kiriman,$tabel);
 				$hasil_insersi_surat_berkas?$hasil_insersi_surat_berkas='okbro':$hasil_insersi_surat_berkas=NULL;
-				redirect($_POST['asal_surat']."/".$hasil_insersi_surat_berkas);
+				redirect($_POST['asal_surat'].'/'.$hasil_insersi_surat_berkas);
 				}
 				$this->load->view('admin_frontoffice/dashboard',$data);
 			} else{
@@ -16015,6 +16330,11 @@ class Frontoffice extends CI_Controller {
 	public function general_insertion_controller($kiriman,$tabel)
 	{
 		return $this->model_frommyframework->general_insertion_model($kiriman,$tabel);
+	}
+
+	public function general_insertion_controller_baru($kiriman,$tabel)
+	{
+		return $this->model_frommyframework->general_insertion_model_baru($kiriman,$tabel);
 	}
 
 	public function page_Recordset1_search($pageNum_Recordset1,$maxRows_Recordset1,$tabel,$kolom_cari,$key_cari)

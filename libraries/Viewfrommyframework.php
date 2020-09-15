@@ -1175,6 +1175,854 @@ class Viewfrommyframework {
             </div>
         </div>
     ";
+    }
+    
+    public function baca_agenda_view_9001_OLD($table='tbagenda_kerja',$mulai_rekord=0,$jumlah_rekord=20,$order='desc'){
+        /**
+         * Rencana revisi untuk fungsi ini:
+         * [0]Hapus beberapa informasi yang tidak penting seperti id acara, cukup mereka tampil di bagian kelola agenda.
+         * [1]Tambahkan menu popup.
+         * [2]Ganti menu rincian dan menu kirim.
+         * [3]Ga usah pake narasi di ruangkaban, tapi sembunyikan saja.
+         * [4]Tambahkan jam pada tanggal.
+         * [5]Khusus untuk penampilan informasi tanggal di agenda hari ini, gabungkan dalam satu kolom format:
+         * Cek dulu bila kolom tanggal_mulai dan tanggal_sampai nilainya sama maka tampilkan informasi dengan format:
+         * Mulai Jam:
+         * Sampai Jam:
+         * Jika tanggal_mulai tidak sama dengan tanggal_sampai maka:
+         * Mulai Tanggal:     Jam:...
+         * Sampai Tanggal:    Jam:...
+         */
+
+		echo "
+			<h5>Agenda Hari Ini</h5>  
+            <table class='table table-hover table-striped' width=\"100%\">
+            <style>
+            #head_agenda{
+                display:none;
+            }
+            .kiri_tabel{
+                display:none;
+            }
+            @media screen and (max-width: 480px) {
+                .kiri_tabel{
+                    display:table-cell;
+                }
+                .kanan_tabel{
+                    display:none;
+                }
+                #menu_pengayaan{
+                    width:200px;
+                }
+            }
+            </style>
+            <thead>
+				<tr id='head_agenda'>
+				<th colspan=2 class='kiri_tabel' data-toggle=\"tooltip\" title=\"Tambahkan agenda baru\"><button  data-toggle=\"modal\" data-target=\"#modal_baca_surat_new_tambah\" style=\"width:100%;\" class=\"btn btn-success shadow-sm kotak tambahkan_item_agenda\"><i class='fas fa-plus fa-sm text-white-100'></i> Agenda</button></th>
+                <th style='min-width:200px;'>
+                <div class='kiri_tabel'>
+                <input style=\"width:50px;height:30px;float:left;margin-right:5px;margin-top:8px;\" type=\"number\" class=\"form-control kotak\" id=\"quantity_agenda2\" name=\"quantity_agenda\" min=\"1\" value=\"5\" max=\"100000\">
+                <button class=\"btn btn-success shadow-sm kotak\" id=\"tampilbaris_agenda2\" style=\"float:left;margin-bottom:0px;\"><i class='fas fa-eye fa-sm text-white-100'></i></button>
+				</div>
+                </th>
+				<th><input id=\"cari_agenda\" class='form-control' type=\"text\" placeholder=\"Search..\"></th>
+				<th></th>
+                <th data-toggle=\"tooltip\" title=\"Tampilkan jumlah rekord agenda\">
+                <div class='kanan_tabel'>
+				<input type=\"number\" class=\"form-control kotak\" id=\"quantity_agenda\" name=\"quantity_agenda\" min=\"1\" value=\"5\" max=\"100000\" style=\"width:50px;height:30px;float:right;margin-right:-15px;\">
+                </div>
+                </th>
+                <th class='kanan_tabel'>
+                <button class=\"btn btn-success shadow-sm kotak\" id=\"tampilbaris_agenda\" style=\"float:left;margin-bottom:0px;\"><i class='fas fa-eye fa-sm text-white-100'></i></button>
+				</th>
+                <th class='kanan_tabel' colspan=2 data-toggle=\"tooltip\" title=\"Tambahkan agenda baru\"><button  data-toggle=\"modal\" data-target=\"#modal_baca_surat_new_tambah\" style=\"width:100%;\" class=\"btn btn-success shadow-sm kotak tambahkan_item_agenda\"><i class='fas fa-plus fa-sm text-white-100'></i> Agenda</button></th>
+                </tr>
+                <script>
+                $(document).ready(function(){
+                    $('#cari_agenda').on('keyup', function() {
+                        var value = $(this).val().toLowerCase();
+                        $('.cari_agenda_rekord').filter(function() {
+                          $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                        });
+                      });
+                      
+                    $('#tampilbaris_agenda').click(function(){
+                        var loading = $('#pra_tabel');
+                        var tampilkan = $('#penampil_tabel');
+                        var limit = $('#quantity_agenda').val();
+                        tampilkan.hide();
+                        loading.fadeIn(); 
+                        $.post('".site_url('/Frontoffice/baca_agenda_limit_9001/tbagenda_kerja/0/')."'+limit,{ data:'okbro'},
+                        function(data,status){
+                            loading.fadeOut();
+                            tampilkan.html(data);
+                            tampilkan.fadeIn(2000);
+                        });
+                    });
+                    $('#tampilbaris_agenda2').click(function(){
+                        var loading = $('#pra_tabel');
+                        var tampilkan = $('#penampil_tabel');
+                        var limit = $('#quantity_agenda2').val();
+                        tampilkan.hide();
+                        loading.fadeIn(); 
+                        $.post('".site_url('/Frontoffice/baca_agenda_limit_9001/tbagenda_kerja/0/')."'+limit,{ data:'okbro'},
+                        function(data,status){
+                            loading.fadeOut();
+                            tampilkan.html(data);
+                            tampilkan.fadeIn(2000);
+                        });
+                    });
+                    $(\".tambahkan_item_agenda\").click(function(){
+                        var loading = $(\"#pra_baca_surat_new_tambah\");
+                        var tampilkan = $(\"#penampil_baca_surat_new_tambah\");
+                        var limit=$(\"#quantity\").val();
+                        tampilkan.hide();
+                        loading.fadeIn(); 
+                        $.post('".site_url("/Frontoffice/tambah_data_new_agenda2/".$table)."',{ data:\"okbro\"},
+                        function(data,status){
+                            loading.fadeOut();
+                            tampilkan.html(data);
+                            tampilkan.fadeIn(2000);
+                        });
+                    });
+
+                    $('#tool_kanan_agenda').click(function(){
+                        $('#head_agenda').toggle(1000);
+                    });
+
+                    $('#tool_kiri_agenda').click(function(){
+                        $('#head_agenda').toggle(1000);
+                    });
+                  });
+                </script>
+            </thead>
+			<thead>
+				<tr>
+                <th class='kiri_tabel'>
+                <button class=\"btn btn-danger shadow-sm kotak\" id=\"tool_kiri_agenda\" data-toggle=\"tooltip\" title=\"Tampilkan tool tambahan\"><i class='fas fa-cog fa-sm text-white-100'></i></button>
+                </th>
+				<th>id</th>
+                <th>Acara</th>
+				<th>Tempat</th>
+				<th>Tanggal:Jam</th>
+				<th>Sifat Kegiatan</th>
+				<th class='kanan_tabel'>Aksi</th>
+				<th class='kanan_tabel'>
+                <button style='float:right;' class=\"btn btn-danger shadow-sm kotak\" id=\"tool_kanan_agenda\" data-toggle=\"tooltip\" title=\"Tampilkan tool tambahan\"><i class='fas fa-cog fa-sm text-white-100'></i></button>
+                </th>
+				</tr>
+			</thead>
+			<tbody>";
+			$fields=$this->CI->model_frommyframework->penarik_semua_nama_kolom_sebuah_tabel($table);
+			$query=$this->CI->model_frommyframework->query_dengan_limit($table,$mulai_rekord,$jumlah_rekord,$fields[0],$order);
+			foreach ($query->result() as $row)
+			{
+                    echo "
+                    <div class='cari_agenda_rekord'>
+					<tr class='cari_agenda_rekord' data-toggle=\"tooltip\" title=\"Klik untuk menampilkan surat agenda\" style='cursor:pointer;'>
+                    <th class='kiri_tabel'>
+                    <button data-toggle=\"modal\" data-target=\"#modal_foto_sedang\" style=\"width:40px; margin-bottom:5px;\" class=\"d-sm-inline-block btn btn-sm btn-success shadow-sm cetak_laporan_agenda$row->idagenda_kerja\"><i class='fas fa-download fa-sm text-white-50'></i></button>
+                    <!--<br><button data-toggle=\"modal\" data-target=\"#modal_kirim_agenda\" data-toggle=\"tooltip\" title=\"Unggah Media (foto, Video atau Surat baru)\" style=\"width:40px; margin-bottom:5px;\" class=\"d-sm-inline-block btn btn-sm btn-success shadow-sm unggah_file_baru$row->idagenda_kerja\"><i class='fas fa-upload fa-sm text-white-50'></i></button>
+                    -->
+                    <br><button data-toggle=\"modal\" data-target=\"#modal_kirim_agenda\" data-toggle=\"tooltip\" title=\"Kirim ke OPD lain atau ke bidang\" style=\"width:100%;margin-bottom:5px;\" class=\"btn btn-info btn-sm shadow-sm kotak teruskan_kaban$row->idagenda_kerja\"><i class='fas fa-paper-plane fa-sm text-white-100'></i></button>
+                    <br><button data-toggle=\"tooltip\" title=\"Tampilkan foto, video dan rincian lengkap kegiatan\" style=\"width:40px;\" class=\"d-sm-inline-block btn btn-sm btn-warning shadow-sm rincian_agenda$row->idagenda_kerja\"><i class='fas fa-eye fa-sm text-white-50'></i></button>
+                    
+                    </th>    
+                    <div >
+                    <td class='buka_surat_rekord$row->idagenda_kerja' data-toggle=\"modal\" data-target=\"#modal_baca_surat_new\">".$row->idagenda_kerja."</td>
+                    <td style='max-width:400px;' class='buka_surat_rekord$row->idagenda_kerja' data-toggle=\"modal\" data-target=\"#modal_baca_surat_new\">".$row->acara_kegiatan."<br>
+                    </td>
+					<td class='buka_surat_rekord$row->idagenda_kerja' data-toggle=\"modal\" data-target=\"#modal_baca_surat_new\">".$row->tempat."</td>
+                    <td style='min-width:200px;' class='buka_surat_rekord$row->idagenda_kerja' data-toggle=\"modal\" data-target=\"#modal_baca_surat_new\">Mulai Tgl: ".$row->tanggal_mulai."<br>
+                    Jam: ".$row->jam_mulai."<br>
+                    Akhir Tgl: ".$row->tanggal_selesai."<br>
+                    Jam: ".$row->jam_selesai."<br>
+                    </td>
+                    <td class='buka_surat_rekord$row->idagenda_kerja' data-toggle=\"modal\" data-target=\"#modal_baca_surat_new\">";
+                    //echo "Urgensi: <br>";
+                    if($row->urgensi=='penting'){
+                        echo "<span class='badge badge-warning badge-counter' style='font-size:13px;'>
+                        $row->urgensi</span>";
+                    }elseif($row->urgensi=='sangat penting'){
+                        echo "<span class='badge badge-danger badge-counter' style='font-size:13px;'>
+                        $row->urgensi</span>";
+                    }elseif($row->urgensi=='rutin'){
+                        echo "<span class='badge badge-primary badge-counter' style='font-size:13px;'>
+                        $row->urgensi</span>";
+                    }elseif($row->urgensi=='dapat diwakilkan'){
+                        echo "<span class='badge badge-success badge-counter' style='font-size:13px;'>
+                        $row->urgensi</span>";
+                    }elseif($row->urgensi=='biasa'){
+                        echo "<span class='badge badge-info badge-counter' style='font-size:13px;'>
+                        $row->urgensi</span>";
+                    }elseif($row->urgensi=='Yang lain (others)'){
+                        echo "<span class='badge badge-counter' style='font-size:13px;background:#29a99f;color:white;'>
+                        $row->urgensi</span>";
+                    }else{
+                        echo "<span class='badge badge-success badge-counter' style='font-size:13px;'>
+                        $row->urgensi</span>";
+                    }
+                    echo "<br>Status: <br>";
+                    echo $row->status_kegiatan;
+                    echo "</td>       
+                    </div>             
+                    <td colspan=2 width='150px' class='kanan_tabel'>
+                    <!--<button data-toggle=\"modal\" data-target=\"#modal_kirim_agenda\" data-toggle=\"tooltip\" title=\"Teruskan ke Kaban\" style=\"width:100%;\" class=\"btn btn-danger shadow-sm kotak\" id=\"teruskan_kaban$row->idagenda_kerja\"><i class='fas fa-paper-plane fa-sm text-white-100'></i> Kirim</button>
+                    -->
+                    <button data-toggle=\"modal\" data-target=\"#modal_foto_sedang\" style=\"width:100%; margin-bottom:5px;\" class=\"d-sm-inline-block btn btn-sm btn-success shadow-sm cetak_laporan_agenda$row->idagenda_kerja\"><i class='fas fa-download fa-sm text-white-50'></i> Cetak</button>
+                    <button data-toggle=\"modal\" data-target=\"#modal_kirim_agenda\" data-toggle=\"tooltip\" title=\"Kirim ke OPD lain atau ke bidang\" style=\"width:100%;margin-bottom:5px;\" class=\"btn btn-info btn-sm shadow-sm kotak teruskan_kaban$row->idagenda_kerja\"><i class='fas fa-paper-plane fa-sm text-white-100'></i> Kirim undangan</button>
+                    <button data-toggle=\"tooltip\" title=\"Tampilkan foto, video dan rincian lengkap kegiatan\" style=\"width:100%;\" class=\"d-sm-inline-block btn btn-sm btn-warning shadow-sm rincian_agenda$row->idagenda_kerja\"><i class='fas fa-eye fa-sm text-white-50'></i> More..</button>
+                    
+                    </td>
+                    </tr>
+                    <tr id='tr$row->idagenda_kerja'>
+                    <td colspan='9'>
+                    <div id='menu_pengayaan'>
+                    <button data-toggle=\"modal\" data-target=\"#modal_kirim_agenda\" data-toggle=\"tooltip\" title=\"Unggah Media (foto, Video atau Surat baru)\" style=\"width:100%; margin-bottom:5px;\" class=\"d-sm-inline-block btn btn-sm btn-success shadow-sm unggah_file_baru$row->idagenda_kerja\"><i class='fas fa-upload fa-sm text-white-50'></i> Unggah Foto, Video dan Surat tambahan</button>
+                    <button data-toggle=\"modal\" data-target=\"#modal_foto_sedang\" data-toggle=\"tooltip\" title=\"Tampilkan foto kegiatan\" style=\"width:100%;margin-bottom:5px;\" class=\"d-sm-inline-block btn btn-sm btn-success shadow-sm\" id=\"lihat_foto_agenda$row->idagenda_kerja\"><i class='fas fa-eye fa-sm text-white-50'></i> Lihat Foto</button>
+                    <button data-toggle=\"modal\" data-target=\"#modal_baca_surat_new\" data-toggle=\"tooltip\" title=\"Tampilkan video kegiatan\" style=\"width:100%;margin-bottom:5px;\" class=\"d-sm-inline-block btn btn-sm btn-success shadow-sm\" id=\"lihat_video_agenda$row->idagenda_kerja\"><i class='fas fa-eye fa-sm text-white-50'></i> Lihat Video</button>
+                    <button data-toggle=\"modal\" data-target=\"#modal_baca_surat_new\" data-toggle=\"tooltip\" title=\"Tampilkan semua surat kegiatan\" style=\"width:100%;margin-bottom:5px;\" class=\"d-sm-inline-block btn btn-sm btn-success shadow-sm buka_surat_rekord$row->idagenda_kerja\" ><i class='fas fa-eye fa-sm text-white-50'></i> Lihat Surat</button>
+                    <button data-toggle=\"tooltip\" title=\"Tampilkan menu lebih lengkap\" style=\"width:100%;margin-bottom:5px;\" class=\"d-sm-inline-block btn btn-sm btn-success shadow-sm\" id=\"lihat_rincian_menu_lengkap$row->idagenda_kerja\"><i class='fas fa-eye fa-sm text-white-50'></i> Lihat Menu Lebih Lengkap</button>
+                    <div id='menu_lebih_lengkap$row->idagenda_kerja'>
+                    <button id='edit_keterangan_foto$row->idagenda_kerja' data-toggle=\"modal\" data-target=\"#modal_foto_sedang\" data-toggle=\"tooltip\" title=\"Edit keterangan pada foto\" style=\"width:100%;margin-bottom:5px;\" class=\"d-sm-inline-block btn btn-sm btn-info shadow-sm\"><i class='fas fa-eye fa-sm text-white-50'></i> Edit Keterangan Foto</button>
+                    <button id='hapus_media$row->idagenda_kerja' data-toggle=\"modal\" data-target=\"#modal_foto_sedang\" data-toggle=\"tooltip\" title=\"Hapus Foto, Video atau Surat\" style=\"width:100%;margin-bottom:5px;\" class=\"d-sm-inline-block btn btn-sm btn-info shadow-sm\"><i class='fas fa-eye fa-sm text-white-50'></i> Hapus Media pada Agenda</button>
+                    <button style=\"width:100%; margin-bottom:5px;\" data-toggle=\"modal\" data-target=\"#modal_baca_surat_new_narasi\" class=\"d-sm-inline-block btn btn-sm btn-info shadow-sm kotak\" id=\"narasi_agenda$row->idagenda_kerja\"><i class='fas fa-sticky-note fa-sm text-white-100'></i>  Narasi Acara</button>
+                    <button data-toggle=\"modal\" data-target=\"#modal_foto_sedang\" data-toggle=\"tooltip\" title=\"Edit atau hapus acara ini\" style=\"width:100%;margin-bottom:5px;\" class=\"d-sm-inline-block btn btn-sm btn-info shadow-sm\" id='edit_hapus_acara$row->idagenda_kerja'><i class='fas fa-cog fa-sm text-white-50'></i> Edit/Hapus Acara ini keseluruhan</button>
+                    <button data-toggle=\"tooltip\" title=\"Tampilkan rincian kegiatan\" style=\"width:100%;margin-bottom:5px;\" class=\"d-sm-inline-block btn btn-sm btn-info shadow-sm\" id='lihat_rincian_lengkap$row->idagenda_kerja'><i class='fas fa-eye fa-sm text-white-50'></i> Lihat Rincian Data Agenda</button>
+                    </div>
+                    </div>
+                        <style>
+                        #menu_lebih_lengkap$row->idagenda_kerja{
+                            display:none;
+                        }
+                        </style>
+                    </td>
+                    </tr>
+
+					<tr id='tr2$row->idagenda_kerja' style='display:none;'>
+                    <td align=center><i class='fas fa-eye fa-lg text-white-100'></i><br>
+                    <button style=\"width:100%; margin-bottom:5px;\" class=\"d-sm-inline-block btn btn-sm btn-warning shadow-sm kotak\" id=\"tutup_rincian2$row->idagenda_kerja\"><i class='fas fa-eye-slash fa-sm text-white-100'></i><br>Tutup</button>
+                    <button data-toggle=\"tooltip\" title=\"Perbaharui tampilan acara ini\" style=\"width:100%; margin-bottom:5px;\" class=\"d-sm-inline-block btn btn-sm btn-warning shadow-sm kotak\" id=\"refresh$row->idagenda_kerja\"><span style='color:green;'><i class='fas fa-leaf fa-sm text-white-100'></i><br>Refresh</span></button>
+                    <!--
+                    <div data-toggle=\"tooltip\" title=\"Buka edit narasi kegiatan\"><button style=\"width:100%; margin-bottom:5px;\" data-toggle=\"modal\" data-target=\"#modal_baca_surat_new_narasi\" class=\"d-sm-inline-block btn btn-sm btn-warning shadow-sm kotak\" id=\"narasi_agenda$row->idagenda_kerja\"><i class='fas fa-sticky-note fa-sm text-white-100'></i><br>Narasi Acara</button>
+                    </div>
+                    <div data-toggle=\"tooltip\" title=\"Buka surat pendukung kegiatan\"><button style=\"width:100%; margin-bottom:5px;\" data-toggle=\"modal\" data-target=\"#modal_baca_surat_new\" class=\"d-sm-inline-block btn btn-sm btn-warning shadow-sm kotak\" id=\"buka_surat_agenda$row->idagenda_kerja\"><i class='fas fa-envelope-open fa-sm text-white-100'></i><br>Buka Surat</button>
+                    </div>
+                    <div data-toggle=\"tooltip\" title=\"Lihat foto-foto agenda\"><button style=\"width:100%; margin-bottom:5px;\" data-toggle=\"modal\" data-target=\"#modal_foto_sedang\" class=\"d-sm-inline-block btn btn-sm btn-warning shadow-sm kotak\" id=\"lihat_foto_agenda2$row->idagenda_kerja\"><i class='fas fa-images fa-sm text-white-100'></i><br>Lihat Foto</button>
+                    </div>
+                    <div data-toggle=\"tooltip\" title=\"Lihat video-video acara\"><button style=\"width:100%; margin-bottom:5px;\" data-toggle=\"modal\" data-target=\"#modal_baca_surat_new\" class=\"d-sm-inline-block btn btn-sm btn-warning shadow-sm kotak\" id=\"lihat_video_agenda2$row->idagenda_kerja\"><i class='fas fa-file-video fa-sm text-white-100'></i><br>Lihat Video</button>
+                    </div>
+                    <div data-toggle=\"tooltip\" title=\"Buat laporan kegiatan dalam ppt, pdf, word atau excel\"><button style=\"width:100%; margin-bottom:5px;\" data-toggle=\"modal\" data-target=\"#modal_foto_sedang\" class=\"d-sm-inline-block btn btn-sm btn-danger shadow-sm kotak\" id=\"cetak_laporan_agenda2$row->idagenda_kerja\"><i class='fas fa-print fa-sm text-white-100'></i><br>Cetak Laporan</button>
+                    </div>
+                    -->
+                    </td>
+					<td colspan=6 >
+                    Rincian:<br>";
+                    //foreach($fields as $key=>$nama_kolom){
+                    //    echo "<b>".ucwords(implode(' ',explode('_',$nama_kolom))).":</b> ".$row->$nama_kolom."<br>";
+                    //}    
+                    echo "
+                    <center>
+                        <div id='pra_rincian_agenda$row->idagenda_kerja' style='width:40%;display:none;' align='center' >
+                        <!--<i class='fa-3x fas fa-spinner fa-pulse' ".$this->CI->config->item('style_progres_bulat_admin')."></i>-->
+                        <i class='fa-3x fas fa-spinner fa-spin' style='margin-top:100px;'></i>
+                        <!--
+                        <div class='progress' style='margin-top:50px; height:20px'>
+                            <div class='progress-bar progress-bar-striped active' role='progressbar' aria-valuenow='90' aria-valuemin='0' aria-valuemax='100' style='width:100%'>
+                            mohon tunggu...
+                            </div>
+                        </div>
+                        -->
+                        </div>
+                    </center>
+                    <div id=penampil_rincian_agenda$row->idagenda_kerja align='left' style='width:100%;overflow:auto;'></div>
+                    ";                
+                    echo "
+					</td>
+                    </tr>
+                    </div><!--untuk class cari_agenda_rekord-->";
+                    
+                    $direktori_surat=$this->CI->enkripsi->strToHex($this->CI->enkripsi->enkripSimetri_data($row->direktori_surat_pendukung));
+                    $direktori_foto=$this->CI->enkripsi->strToHex($this->CI->enkripsi->enkripSimetri_data($row->direktori_foto_yg_menyertai));
+                    $direktori_video=$this->CI->enkripsi->strToHex($this->CI->enkripsi->enkripSimetri_data($row->direktori_video_yang_menyertai));
+                    $keterangan_foto=$this->CI->enkripsi->strToHex($this->CI->enkripsi->enkripSimetri_data($row->keterangan_foto));
+                    $rekord=$this->CI->enkripsi->strToHex($this->CI->enkripsi->enkapsulasiData($row));
+                    $video=explode('.',$row->direktori_video_yang_menyertai);
+                    $surat=explode('.',$row->direktori_surat_pendukung);
+                    $foto=explode('.',$row->direktori_foto_yg_menyertai);
+                    $token=$this->CI->enkripsi->enkapsulasiData('andisinra');//ini untuk sementara, rencananya token ini berubah-ubah
+					
+                    echo "
+					<style>
+						#tr$row->idagenda_kerja{
+							display:none;
+						}
+                    </style>
+                    
+                    <script>
+                    $(document).ready(function(){
+                        $(\"#narasi_agenda$row->idagenda_kerja\").click(function(){
+                            var loading = $(\"#pra_baca_surat_new_narasi\");
+                            var tampilkan = $(\"#penampil_baca_surat_new_narasi\");
+                            tampilkan.hide();
+                            loading.fadeIn(); 
+                            $.post('".site_url('Frontoffice/tes_menampilkan_editor_agenda/'.$row->idagenda_kerja)."',{ data:\"okbro\"},
+                            function(data,status){
+                                loading.fadeOut();
+                                tampilkan.html(data);
+                                tampilkan.fadeIn(2000);
+                            });
+                        });
+
+                        $(\".teruskan_kaban$row->idagenda_kerja\").click(function(){
+                            var loading1 = $(\"#pra_kirim_agenda1\");
+                            var tampilkan1 = $(\"#penampil_kirim_agenda1\");
+                            tampilkan1.hide();
+                            loading1.fadeIn(); 
+                            $.post('".site_url('Frontoffice/tampilkan_pilihan_kirim_foto_video/tbagenda_kerja/idagenda_kerja/'.$row->idagenda_kerja)."',{ data:\"okbro\"},
+                            function(data,status){
+                                loading1.fadeOut();
+                                tampilkan1.html(data);
+                                tampilkan1.fadeIn(2000);
+                            });
+                        });
+                        
+                        $(\".unggah_file_baru$row->idagenda_kerja\").click(function(){
+                            var loading1 = $(\"#pra_kirim_agenda1\");
+                            var tampilkan1 = $(\"#penampil_kirim_agenda1\");
+                            tampilkan1.hide();
+                            loading1.fadeIn(); 
+                            $.post('".site_url('Frontoffice/unggah_file_baru_9001/tbagenda_kerja/idagenda_kerja/'.$row->idagenda_kerja)."',{ data:\"okbro\"},
+                            function(data,status){
+                                loading1.fadeOut();
+                                tampilkan1.html(data);
+                                tampilkan1.fadeIn(2000);
+                            });
+                        });
+                    });
+                    </script>
+
+                    <script>
+                    var loaded$row->idagenda_kerja = false;
+					$(document).ready(function(){
+                    if(!loaded$row->idagenda_kerja){
+                        $(\".buka_surat_rekord$row->idagenda_kerja\").click(function(){
+                            var header = $(\"#header_pra_baca_surat_new\");
+                            var header1 = $(\"#header_pra_baca_surat_new1\");
+							var loading = $(\"#pra_baca_surat_new\");
+							var tampilkan = $(\"#penampil_baca_surat_new\");
+							var loading1 = $(\"#pra_baca_surat_new1\");
+							var tampilkan1 = $(\"#penampil_baca_surat_new1\");
+							tampilkan.hide();
+                            loading.fadeIn(); 
+                            header.html('');
+                            header1.html('');
+
+                            /*$.post('".site_url('Frontoffice/tesopenpdf/'.$direktori_surat)."',{ data:\"okbro\"},*/
+                            $.post('".site_url('Frontoffice/tampilkan_list_surat_agenda/'.$direktori_surat)."',{ data:\"okbro\"},
+							function(data,status){
+                                loading.fadeOut();
+                                tampilkan.html(data);
+                                tampilkan.fadeIn(2000);
+                                loading1.fadeOut();
+                                ";
+                                //if($surat[sizeof($surat)-1]=='pdf'||$surat[sizeof($surat)-1]=='png'||$surat[sizeof($surat)-1]=='jpg'||$surat[sizeof($surat)-1]=='html'||$surat[sizeof($surat)-1]=='htm'||$surat[sizeof($surat)-1]=='bmp'||$surat[sizeof($surat)-1]=='gif'||$surat[sizeof($surat)-1]=='mp4'||$surat[sizeof($surat)-1]=='mp3'||$surat[sizeof($surat)-1]=='vid'||$surat[sizeof($surat)-1]=='wav') echo "            tampilkan1.html(data);";
+                                if(in_array($surat[sizeof($surat)-1],array('ogg','pdf','png','jpg','wav','mp4','html','htm','gif','bmp','vid','mp3','sql','txt'))) echo "tampilkan1.html(data)";
+					echo "		});
+                        });
+
+                        $(\"#hapus_media$row->idagenda_kerja\").click(function(){
+							var loading = $(\"#pra_foto_sedang\");
+							var tampilkan = $(\"#penampil_foto_sedang\");
+							tampilkan.hide();
+                            loading.fadeIn(); 
+                            $.post('".site_url('Frontoffice/tampilkan_list_foto_dan_video_9001/tbagenda_kerja/idagenda_kerja/'.$row->idagenda_kerja)."',{ data:\"okbro\"},
+							function(data,status){
+                                loading.fadeOut();
+                                tampilkan.html(data);
+                                tampilkan.fadeIn(2000);
+                            });
+                        });
+
+                        $(\"#edit_keterangan_foto$row->idagenda_kerja\").click(function(){
+							var loading = $(\"#pra_foto_sedang\");
+							var tampilkan = $(\"#penampil_foto_sedang\");
+							tampilkan.hide();
+                            loading.fadeIn(); 
+                            $.post('".site_url('Frontoffice/edit_keterangan_foto/tbagenda_kerja/idagenda_kerja/'.$row->idagenda_kerja)."',{ data:\"okbro\"},
+							function(data,status){
+                                loading.fadeOut();
+                                tampilkan.html(data);
+                                tampilkan.fadeIn(2000);
+                            });
+                        });
+
+                        $(\"#rincian_agenda2$row->idagenda_kerja\").click(function(){
+                            var loading = $(\"#pra_rincian_agenda$row->idagenda_kerja\");
+                            var tampilkan = $(\"#penampil_rincian_agenda$row->idagenda_kerja\");
+                            tampilkan.hide();
+                            loading.fadeIn(); 
+                            $.post('".site_url('/Frontoffice/buka_rincian_agenda/tbagenda_kerja/idagenda_kerja/'.$row->idagenda_kerja)."',{ data:\"okbro\"},
+                            function(data,status){
+                                loading.fadeOut();
+                                tampilkan.html(data);
+                                tampilkan.fadeIn(2000);
+                            });
+                        });
+
+                        $(\"#lihat_rincian_lengkap$row->idagenda_kerja\").click(function(){
+                            var loading = $(\"#pra_rincian_agenda$row->idagenda_kerja\");
+                            var tampilkan = $(\"#penampil_rincian_agenda$row->idagenda_kerja\");
+                            tampilkan.hide();
+                            loading.fadeIn(); 
+                            $.post('".site_url('/Frontoffice/buka_rincian_agenda/tbagenda_kerja/idagenda_kerja/'.$row->idagenda_kerja)."',{ data:\"okbro\"},
+                            function(data,status){
+                                loading.fadeOut();
+                                tampilkan.html(data);
+                                tampilkan.fadeIn(2000);
+                            });
+                        });
+
+                        $(\"#refresh$row->idagenda_kerja\").click(function(){
+                            var loading = $(\"#pra_rincian_agenda$row->idagenda_kerja\");
+                            var tampilkan = $(\"#penampil_rincian_agenda$row->idagenda_kerja\");
+                            tampilkan.hide();
+                            loading.fadeIn(); 
+                            $.post('".site_url('/Frontoffice/buka_rincian_agenda/tbagenda_kerja/idagenda_kerja/'.$row->idagenda_kerja)."',{ data:\"okbro\"},
+                            function(data,status){
+                                loading.fadeOut();
+                                tampilkan.html(data);
+                                tampilkan.fadeIn(2000);
+                            });
+                        });
+
+                        $(\".cetak_laporan_agenda$row->idagenda_kerja\").click(function(){
+							var loading = $(\"#pra_foto_sedang\");
+							var tampilkan = $(\"#penampil_foto_sedang\");
+							tampilkan.hide();
+                            loading.fadeIn(); 
+                            $.post('".site_url('Frontoffice/buka_papan_cetak_agenda/tbagenda_kerja/idagenda_kerja/'.$row->idagenda_kerja)."',{ data:\"okbro\"},
+							function(data,status){
+                                loading.fadeOut();
+                                tampilkan.html(data);
+                                tampilkan.fadeIn(2000);
+                            });
+                        });
+
+                        $(\"#edit_hapus_acara$row->idagenda_kerja\").click(function(){
+							var loading = $(\"#pra_foto_sedang\");
+							var tampilkan = $(\"#penampil_foto_sedang\");
+							tampilkan.hide();
+                            loading.fadeIn(); 
+                            $.post('".site_url('Frontoffice/edit_hapus_acara_keseluruhan/tbagenda_kerja/idagenda_kerja/'.$row->idagenda_kerja)."',{ data:\"okbro\"},
+							function(data,status){
+                                loading.fadeOut();
+                                tampilkan.html(data);
+                                tampilkan.fadeIn(2000);
+                            });
+                        });
+
+                        $(\"#cetak_laporan_agenda2$row->idagenda_kerja\").click(function(){
+							var loading = $(\"#pra_foto_sedang\");
+							var tampilkan = $(\"#penampil_foto_sedang\");
+							tampilkan.hide();
+                            loading.fadeIn(); 
+                            $.post('".site_url('Frontoffice/buka_papan_cetak_agenda/tbagenda_kerja/idagenda_kerja/'.$row->idagenda_kerja)."',{ data:\"okbro\"},
+							function(data,status){
+                                loading.fadeOut();
+                                tampilkan.html(data);
+                                tampilkan.fadeIn(2000);
+                            });
+                        });
+
+						$(\".rincian_agenda$row->idagenda_kerja\").click(function(){
+                            $('#tr$row->idagenda_kerja').toggle(500);
+                            $('#tr2$row->idagenda_kerja').hide(500);
+                            /*Agar fungsi toggle ini bisa bekerja, hapus kelas d-sm-inline-block pada #rincian_agenda */
+                        });
+                        $(\"#lihat_rincian_lengkap$row->idagenda_kerja\").click(function(){
+                            $('#tr2$row->idagenda_kerja').toggle(500);
+                            /*Agar fungsi toggle ini bisa bekerja, hapus kelas d-sm-inline-block pada #rincian_agenda */
+						});
+                        $(\"#lihat_rincian_menu_lengkap$row->idagenda_kerja\").click(function(){
+                            $('#menu_lebih_lengkap$row->idagenda_kerja').toggle(500);
+						});
+						$(\"#tutup_rincian$row->idagenda_kerja\").click(function(){
+							$('#tr$row->idagenda_kerja').fadeOut(500);
+                        });
+						$(\"#tutup_rincian2$row->idagenda_kerja\").click(function(){
+							$('#tr2$row->idagenda_kerja').fadeOut(500);
+                        });
+
+                        $(\"#buka_surat_agenda$row->idagenda_kerja\").click(function(){
+                            var header = $(\"#header_pra_baca_surat_new\");
+                            var header1 = $(\"#header_pra_baca_surat_new1\");
+							var loading = $(\"#pra_baca_surat_new\");
+							var tampilkan = $(\"#penampil_baca_surat_new\");
+							var loading1 = $(\"#pra_baca_surat_new1\");
+							var tampilkan1 = $(\"#penampil_baca_surat_new1\");
+							tampilkan.hide();
+                            loading.fadeIn(); 
+                            header.html('');
+                            header1.html('');
+
+                            /*$.post('".site_url('Frontoffice/tesopenpdf/'.$direktori_surat)."',{ data:\"okbro\"},*/
+                            $.post('".site_url('Frontoffice/tampilkan_list_surat_agenda/'.$direktori_surat)."',{ data:\"okbro\"},
+							function(data,status){
+                                loading.fadeOut();
+                                tampilkan.html(data);
+                                tampilkan.fadeIn(2000);
+                                loading1.fadeOut();
+                                ";
+                                //if($surat[sizeof($surat)-1]=='pdf'||$surat[sizeof($surat)-1]=='png'||$surat[sizeof($surat)-1]=='jpg'||$surat[sizeof($surat)-1]=='html'||$surat[sizeof($surat)-1]=='htm'||$surat[sizeof($surat)-1]=='bmp'||$surat[sizeof($surat)-1]=='gif'||$surat[sizeof($surat)-1]=='mp4'||$surat[sizeof($surat)-1]=='mp3'||$surat[sizeof($surat)-1]=='vid'||$surat[sizeof($surat)-1]=='wav') echo "            tampilkan1.html(data);";
+                                if(in_array($surat[sizeof($surat)-1],array('ogg','pdf','png','jpg','wav','mp4','html','htm','gif','bmp','vid','mp3','sql','txt'))) echo "tampilkan1.html(data)";
+					echo "		});
+                        });
+
+                        $(\"#lihat_foto_agenda$row->idagenda_kerja\").click(function(){
+							var loading = $(\"#pra_foto_sedang\");
+							var tampilkan = $(\"#penampil_foto_sedang\");
+							tampilkan.hide();
+                            loading.fadeIn(); 
+
+                            /*$.post('".site_url('Frontoffice/tesopenpdf/'.$direktori_foto)."',{ data:\"okbro\"},*/
+                            $.post('".site_url('Frontoffice/tes_penampil_carousel/'.$direktori_foto.'/'.$keterangan_foto)."',{ data:\"okbro\"},
+							function(data,status){
+                                loading.fadeOut();
+                                tampilkan.html(data);
+                                tampilkan.fadeIn(2000);
+                                loading1.fadeOut();
+                                ";
+                                //if($surat[sizeof($surat)-1]=='pdf'||$surat[sizeof($surat)-1]=='png'||$surat[sizeof($surat)-1]=='jpg'||$surat[sizeof($surat)-1]=='html'||$surat[sizeof($surat)-1]=='htm'||$surat[sizeof($surat)-1]=='bmp'||$surat[sizeof($surat)-1]=='gif'||$surat[sizeof($surat)-1]=='mp4'||$surat[sizeof($surat)-1]=='mp3'||$surat[sizeof($surat)-1]=='vid'||$surat[sizeof($surat)-1]=='wav') echo "            tampilkan1.html(data);";
+                                if(in_array($surat[sizeof($surat)-1],array('pdf','png','jpg','wav','mp4','html','htm','gif','bmp','vid','mp3','sql','txt'))) echo "tampilkan1.html(data)";
+					echo "		});
+                        });
+
+                        $(\"#lihat_video_agenda$row->idagenda_kerja\").click(function(){
+                            var header = $(\"#header_pra_baca_surat_new\");
+                            var header1 = $(\"#header_pra_baca_surat_new1\");
+							var loading = $(\"#pra_baca_surat_new\");
+							var tampilkan = $(\"#penampil_baca_surat_new\");
+							var loading1 = $(\"#pra_baca_surat_new1\");
+							var tampilkan1 = $(\"#penampil_baca_surat_new1\");
+							tampilkan.hide();
+                            loading.fadeIn(); 
+                            header.html('');
+                            header1.html('');
+
+                            /*$.post('".site_url('Frontoffice/tesopenpdf/'.$direktori_surat)."',{ data:\"okbro\"},*/
+                            $.post('".site_url('Frontoffice/tampilkan_list_surat_agenda/'.$direktori_video)."',{ data:\"okbro\"},
+							function(data,status){
+                                loading.fadeOut();
+                                tampilkan.html(data);
+                                tampilkan.fadeIn(2000);
+                                loading1.fadeOut();
+                                ";
+                                //if($surat[sizeof($surat)-1]=='pdf'||$surat[sizeof($surat)-1]=='png'||$surat[sizeof($surat)-1]=='jpg'||$surat[sizeof($surat)-1]=='html'||$surat[sizeof($surat)-1]=='htm'||$surat[sizeof($surat)-1]=='bmp'||$surat[sizeof($surat)-1]=='gif'||$surat[sizeof($surat)-1]=='mp4'||$surat[sizeof($surat)-1]=='mp3'||$surat[sizeof($surat)-1]=='vid'||$surat[sizeof($surat)-1]=='wav') echo "            tampilkan1.html(data);";
+                                if(in_array($surat[sizeof($surat)-1],array('ogg','pdf','png','jpg','wav','mp4','html','htm','gif','bmp','vid','mp3','sql','txt'))) echo "tampilkan1.html(data)";
+					echo "		});
+                        });
+
+                        $(\"#lihat_foto_agenda2$row->idagenda_kerja\").click(function(){
+							var loading = $(\"#pra_foto_sedang\");
+							var tampilkan = $(\"#penampil_foto_sedang\");
+							tampilkan.hide();
+                            loading.fadeIn(); 
+
+                            /*$.post('".site_url('Frontoffice/tesopenpdf/'.$direktori_foto)."',{ data:\"okbro\"},*/
+                            $.post('".site_url('Frontoffice/tes_penampil_carousel/'.$direktori_foto.'/'.$keterangan_foto)."',{ data:\"okbro\"},
+							function(data,status){
+                                loading.fadeOut();
+                                tampilkan.html(data);
+                                tampilkan.fadeIn(2000);
+                                loading1.fadeOut();
+                                ";
+                                //if($surat[sizeof($surat)-1]=='pdf'||$surat[sizeof($surat)-1]=='png'||$surat[sizeof($surat)-1]=='jpg'||$surat[sizeof($surat)-1]=='html'||$surat[sizeof($surat)-1]=='htm'||$surat[sizeof($surat)-1]=='bmp'||$surat[sizeof($surat)-1]=='gif'||$surat[sizeof($surat)-1]=='mp4'||$surat[sizeof($surat)-1]=='mp3'||$surat[sizeof($surat)-1]=='vid'||$surat[sizeof($surat)-1]=='wav') echo "            tampilkan1.html(data);";
+                                if(in_array($surat[sizeof($surat)-1],array('pdf','png','jpg','wav','mp4','html','htm','gif','bmp','vid','mp3','sql','txt'))) echo "tampilkan1.html(data)";
+					echo "		});
+                        });
+
+                        $(\"#lihat_video_agenda2$row->idagenda_kerja\").click(function(){
+                            var header = $(\"#header_pra_baca_surat_new\");
+                            var header1 = $(\"#header_pra_baca_surat_new1\");
+							var loading = $(\"#pra_baca_surat_new\");
+							var tampilkan = $(\"#penampil_baca_surat_new\");
+							var loading1 = $(\"#pra_baca_surat_new1\");
+							var tampilkan1 = $(\"#penampil_baca_surat_new1\");
+							tampilkan.hide();
+                            loading.fadeIn(); 
+                            header.html('');
+                            header1.html('');
+
+                            /*$.post('".site_url('Frontoffice/tesopenpdf/'.$direktori_surat)."',{ data:\"okbro\"},*/
+                            $.post('".site_url('Frontoffice/tampilkan_list_surat_agenda/'.$direktori_video)."',{ data:\"okbro\"},
+							function(data,status){
+                                loading.fadeOut();
+                                tampilkan.html(data);
+                                tampilkan.fadeIn(2000);
+                                loading1.fadeOut();
+                                ";
+                                //if($surat[sizeof($surat)-1]=='pdf'||$surat[sizeof($surat)-1]=='png'||$surat[sizeof($surat)-1]=='jpg'||$surat[sizeof($surat)-1]=='html'||$surat[sizeof($surat)-1]=='htm'||$surat[sizeof($surat)-1]=='bmp'||$surat[sizeof($surat)-1]=='gif'||$surat[sizeof($surat)-1]=='mp4'||$surat[sizeof($surat)-1]=='mp3'||$surat[sizeof($surat)-1]=='vid'||$surat[sizeof($surat)-1]=='wav') echo "            tampilkan1.html(data);";
+                                if(in_array($surat[sizeof($surat)-1],array('ogg','pdf','png','jpg','wav','mp4','html','htm','gif','bmp','vid','mp3','sql','txt'))) echo "tampilkan1.html(data)";
+					echo "		});
+                        });
+
+                        $(\".tutup_suara\").click(function(){
+							var tampilkan = $(\"#penampil_baca_surat_new\");
+                            tampilkan.html('');
+                        });
+
+                        $(\".tutup_suara_perbesar\").click(function(){
+                            var tampilkan = $(\"#penampil_baca_surat_new1\");
+                            tampilkan.html('');
+                        });
+
+                        $(\".tutup_suara_foto\").click(function(){
+                            var tampilkan = $(\"#penampil_foto_sedang\");
+                            tampilkan.html('');
+                        });
+
+                    }
+                    loaded$row->idagenda_kerja=true;
+
+                        });
+                    </script>";
+			}
+			echo "
+			</tbody>
+			</table>
+        ";
+        echo "
+            <!-- Modal FOTO SEDANG-->
+            <div class='modal fade' id='modal_foto_sedang' role='dialog' style='z-index:100000;'>
+                <div class='modal-dialog'>
+                
+                <!-- Modal content-->
+                <div class=\"modal-content\" style='background-color: rgba(230, 230, 230, 0.95);'>
+                    <div class=\"modal-header\">
+                    <!--<button type=\"button\" class=\"close\" data-dismiss=\"modal\">&times;</button>-->
+                    <h5 class=\"modal-title\">
+                        <img src=\"".base_url('/assets/assets_login/images/LogoSulselH.png')."\" class=\"logo_sulsel\" style=\"height:40px;width:auto;float:left;margin-right:20px;\" />
+                        e-Sinra Ruang ".$this->CI->config->item('nama_opd')." Prov. Sulsel
+                    </h5>
+                    <button type='button' class='close tutup_suara_foto' data-dismiss='modal'>&times;</button>
+                    </div>
+                    <div class='modal-body' >
+                    <center>
+                    <div id='pra_foto_sedang' style='width:65%;' align='center' >
+                    <i class='fa-3x fas fa-spinner fa-pulse' ".$this->CI->config->item('style_progres_bulat_admin')."></i>
+                    <!--
+                    <div class='progress' style='margin-top:50px; height:20px'>
+                        <div class='progress-bar progress-bar-striped active' role='progressbar' aria-valuenow='90' aria-valuemin='0' aria-valuemax='100' style='width:100%'>
+                        mohon tunggu...
+                        </div>
+                    </div>
+                    -->
+                    </center>
+                    <div id=penampil_foto_sedang align='center' style='width:100%;'></div>
+                    </div>
+                    <div class='modal-footer'>
+                    <button type='button' class='btn btn-primary tutup_suara_foto' data-dismiss='modal'>Close</button>
+                    </div>
+                </div>
+                
+                </div>
+            </div>
+        ";
+        echo "
+            <!-- Modal KIRIM AGENDA-->
+            <div class='modal fade' id='modal_kirim_agenda' role='dialog' style='z-index:100000;'>
+                <div class='modal-dialog'>
+                
+                <!-- Modal content-->
+                <div class=\"modal-content\" style='background-color: rgba(230, 230, 230, 0.95);'>
+                    <div class=\"modal-header\">
+                    <!--<button type=\"button\" class=\"close\" data-dismiss=\"modal\">&times;</button>-->
+                    <h5 class=\"modal-title\">
+                        <img src=\"".base_url('/assets/assets_login/images/LogoSulselH.png')."\" class=\"logo_sulsel\" style=\"height:40px;width:auto;float:left;margin-right:20px;\" />
+                        e-Sinra Ruang ".$this->CI->config->item('nama_opd')." Prov. Sulsel
+                    </h5>
+                    <button type='button' class='close tutup_suara_foto' data-dismiss='modal'>&times;</button>
+                    </div>
+                    <div class='modal-body' >
+
+                    <!--batas untuk menampilkan pemilihan apakah hendak ikutkan foto, video atau tidak pilihan_foto_video-->
+                    <center>
+                    <div id='pra_kirim_agenda1' style='width:65%;' align='center' >
+                    <!--<i class='fa-3x fas fa-spinner fa-pulse' ".$this->CI->config->item('style_progres_bulat_admin')."></i>-->
+                    <div class='progress' style='margin-top:50px; height:20px'>
+                        <div class='progress-bar progress-bar-striped active' role='progressbar' aria-valuenow='90' aria-valuemin='0' aria-valuemax='100' style='width:100%'>
+                        mohon tunggu...
+                        </div>
+                    </div>
+                    </center>
+                    <div id=penampil_kirim_agenda1 align='center' style='width:100%;'></div>     
+
+                    </div>
+                    <div class='modal-footer'>
+                    <button type='button' class='btn btn-primary tutup_suara_foto' data-dismiss='modal'>Close</button>
+                    </div>
+                </div>
+                
+                </div>
+            </div>
+        ";
+        
+        echo "
+        <!-- Modal Baca Surat -->
+        <div class='modal fade' id='modal_baca_surat_new' role='dialog' style='z-index:100000;'>
+            <div class='modal-dialog modal-lg'>
+            
+            <!-- Modal content-->
+            <div class=\"modal-content\" style='background-color: rgba(230, 230, 230, 0.95);'>
+                <div class=\"modal-header\">
+                <!--<button type=\"button\" class=\"close\" data-dismiss=\"modal\">&times;</button>-->
+                <h5 class=\"modal-title\">
+                    <img src=\"".base_url('/assets/assets_login/images/LogoSulselH.png')."\" class=\"logo_sulsel\" style=\"height:40px;width:auto;float:left;margin-right:20px;\" />
+                    e-Sinra Ruang ".$this->CI->config->item('nama_opd')." Prov. Sulsel
+                </h5>
+                <button type='button' class='close tutup_suara' data-dismiss='modal'>&times;</button>
+                </div>
+                <div id='header_pra_baca_surat_new' class='modal-header' style='width:90%;margin-left:40px;margin-right:20px;overflow:auto;' align='left' >
+                </div>
+                <div class='modal-body'>
+                <center>
+                <div id='pra_baca_surat_new' style='width:65%;' align='center' >
+                <i class='fa-3x fas fa-spinner fa-pulse' ".$this->CI->config->item('style_progres_bulat_admin')."></i>
+                <!--
+                <div class='progress' style='margin-top:50px; height:20px'>
+                    <div class='progress-bar progress-bar-striped active' role='progressbar' aria-valuenow='90' aria-valuemin='0' aria-valuemax='100' style='width:100%'>
+                    mohon tunggu...
+                    </div>
+                </div>
+                -->
+                </center>
+                <div id=penampil_baca_surat_new align='center' style='width:100%;height:500px;overflow:auto;'></div>
+                </div>
+                <div class='modal-footer'>
+                <button type='button' class='btn btn-primary' id=\"perbesar_modal\" onclick='$(\"#modal_baca_surat_new_perbesar\").modal(\"show\");'>Perbesar</button>
+                <button type='button' class='btn btn-primary tutup_suara' data-dismiss='modal'>Close</button>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+    ";
+    echo "
+        <!-- Modal Baca Surat Perbesar -->
+        <div class='modal fade' id='modal_baca_surat_new_perbesar' role='dialog' style='z-index:100001;'>
+            <div class='modal-dialog modal-lg' style='max-width:100%;'>
+            
+            <!-- Modal content-->
+            <div class=\"modal-content\" style='background-color: rgba(230, 230, 230, 0.95);'>
+                <div class=\"modal-header\">
+                <!--<button type=\"button\" class=\"close\" data-dismiss=\"modal\">&times;</button>-->
+                <h5 class=\"modal-title\">
+                    <img src=\"".base_url('/assets/assets_login/images/LogoSulselH.png')."\" class=\"logo_sulsel\" style=\"height:40px;width:auto;float:left;margin-right:20px;\" />
+                    e-Sinra Ruang ".$this->CI->config->item('nama_opd')." Prov. Sulsel
+                </h5>
+                <button type='button' class='close tutup_suara_perbesar' data-dismiss='modal'>&times;</button>
+                </div>
+                <div id='header_pra_baca_surat_new1' class='modal-header' style='width:90%;margin-left:40px;margin-right:20px;overflow:auto;' align='left' >
+                </div>
+                <div class='modal-body'>
+                <center>
+                <div id='pra_baca_surat_new1' style='width:65%;' align='center' >
+                <i class='fa-3x fas fa-spinner fa-pulse' ".$this->CI->config->item('style_progres_bulat_admin')."></i>
+                <!--
+                <div class='progress' style='margin-top:50px; height:20px'>
+                    <div class='progress-bar progress-bar-striped active' role='progressbar' aria-valuenow='90' aria-valuemin='0' aria-valuemax='100' style='width:100%'>
+                    mohon tunggu...
+                    </div>
+                </div>
+                -->
+                </center>
+                <div id=penampil_baca_surat_new1 align='center' style='width:100%;height:500px;'></div>
+                </div>
+                <div class='modal-footer'>
+                <button type='button' class='btn btn-primary tutup_suara_perbesar' data-dismiss='modal'>Close</button>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+    ";
+        
+    echo "
+    <!-- Modal Edit Narasi Acara -->
+        <div class='modal fade' id='modal_baca_surat_new_narasi' role='dialog' style='z-index:100000;'>
+            <div class='modal-dialog modal-lg'>
+            
+            <!-- Modal content-->
+            <div class=\"modal-content\" style='background-color: rgba(230, 230, 230, 0.95);'>
+                <div class=\"modal-header\">
+                <!--<button type=\"button\" class=\"close\" data-dismiss=\"modal\">&times;</button>-->
+                <h5 class=\"modal-title\">
+                    <img src=\"".base_url('/assets/assets_login/images/LogoSulselH.png')."\" class=\"logo_sulsel\" style=\"height:40px;width:auto;float:left;margin-right:20px;\" />
+                    e-Sinra Ruang ".$this->CI->config->item('nama_opd')." Prov. Sulsel
+                </h5>
+                <button type='button' class='close tutup_suara' data-dismiss='modal'>&times;</button>
+                </div>
+                <div class='modal-body'>
+                <center>
+                <div id='pra_baca_surat_new_narasi' style='width:65%;' align='center' >
+                <i class='fa-3x fas fa-spinner fa-pulse' ".$this->CI->config->item('style_progres_bulat_admin')."></i>
+                <!--
+                <div class='progress' style='margin-top:50px; height:20px'>
+                    <div class='progress-bar progress-bar-striped active' role='progressbar' aria-valuenow='90' aria-valuemin='0' aria-valuemax='100' style='width:100%'>
+                    mohon tunggu...
+                    </div>
+                </div>
+                -->
+                </center>
+                <div id=penampil_baca_surat_new_narasi align='center' style='width:100%;height:500px;overflow:auto;'></div>
+                </div>
+                <div class='modal-footer'>
+                <button type='button' class='btn btn-primary tutup_suara' data-dismiss='modal'>Close</button>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+    ";
+
+    echo "
+    <!-- Modal Tambah Narasi Acara -->
+        <div class='modal fade' id='modal_baca_surat_new_tambah' role='dialog' style='z-index:100000;'>
+            <div class='modal-dialog modal-lg'>
+            
+            <!-- Modal content-->
+            <div class=\"modal-content\" style='background-color: rgba(230, 230, 230, 0.95);'>
+                <div class=\"modal-header\">
+                <!--<button type=\"button\" class=\"close\" data-dismiss=\"modal\">&times;</button>-->
+                <h5 class=\"modal-title\">
+                    <img src=\"".base_url('/assets/assets_login/images/LogoSulselH.png')."\" class=\"logo_sulsel\" style=\"height:40px;width:auto;float:left;margin-right:20px;\" />
+                    e-Sinra Ruang ".$this->CI->config->item('nama_opd')." Prov. Sulsel
+                </h5>
+                <button type='button' class='close tutup_suara' data-dismiss='modal'>&times;</button>
+                </div>
+                <div class='modal-body'>
+                <center>
+                <div id='pra_baca_surat_new_tambah' style='width:65%;' align='center' >
+                <i class='fa-3x fas fa-spinner fa-pulse' ".$this->CI->config->item('style_progres_bulat_admin')."></i>
+                <!--
+                <div class='progress' style='margin-top:50px; height:20px'>
+                    <div class='progress-bar progress-bar-striped active' role='progressbar' aria-valuenow='90' aria-valuemin='0' aria-valuemax='100' style='width:100%'>
+                    mohon tunggu...
+                    </div>
+                </div>
+                -->
+                </center>
+                <div id=penampil_baca_surat_new_tambah align='center' style='width:100%;overflow:auto;'></div>
+                </div>
+                <div class='modal-footer'>
+                <button type='button' class='btn btn-primary tutup_suara' data-dismiss='modal'>Close</button>
+                </div>
+            </div>
+            
+            </div>
+        </div>
+    ";
 	}
 
     //===========================================END REVISI-9001:ruangkaban-view============================================================
@@ -2907,6 +3755,50 @@ class Viewfrommyframework {
             //array_push($perekam_id,rekam($type,$nama_komponen,$class,$id,$atribut,$event,$label,$value=''));
             break;
         case ("multi-file"):
+            is_array($value)?$value='':NULL;
+            $i='';
+            $j=$this->CI->session->userdata('i');
+            $this->CI->session->set_userdata('i',$j+1);
+            echo "<input type=\"file\" style=\"margin-bottom:5px;width:100%;\" class=\"".$class."\" id=\"".$id.$i."\" name=\"".$nama_komponen.$i."\" ".$atribut." ".$event." value=\"".$value."\"><button type=\"button\" id=\"tambah".$id.$i."\" style=\"width:100%;\" class=\"btn btn-sm btn-success shadow-sm\"><i class='fas fa-plus fa-sm text-white-100'></i> Tambah file</button>";
+            //array_push($perekam_id,rekam($type,$nama_komponen,$class,$id,$atribut,$event,$label,$value=''));
+            $class_transfer=$this->CI->enkripsi->strToHex($class);
+            $id_transfer=$this->CI->enkripsi->strToHex($id);
+            $nama_komponen_transfer=$this->CI->enkripsi->strToHex($nama_komponen);
+            echo "
+            <center>
+                <div id='pra_tambah_file".$id.$i."' style='width:40%;display:none;' align='center' >
+                <div class='progress' style='margin-bottom:10px;height:20px;'>
+                <div class='progress-bar progress-bar-striped active' role='progressbar' aria-valuenow='90' aria-valuemin='0' aria-valuemax='100' style='width:100%'>
+                mohon tunggu...
+                </div>
+                </div>
+                </div>
+            </center>
+            <div id=penampil_tambah_file".$id.$i." align='center' style='width:100%;'></div>
+            ";
+            echo "
+            <script>
+                $(document).ready(function(){
+                    $(\"#tambah".$id.$i."\").click(function(){
+                    var loading = $(\"#pra_tambah_file".$id.$i."\");
+                    var tampilkan = $(\"#penampil_tambah_file".$id.$i."\");
+                    var button = $(\"#tambah".$id.$i."\");
+                    var limit=$(\"#quantity\").val();
+                    tampilkan.hide();
+                    loading.fadeIn(); 
+                    $.post('".site_url("/Frontoffice/tambah_file")."',{ class:\"".$class_transfer."\", id:\"".$id_transfer."\", nama_komponen:\"".$nama_komponen_transfer."\" },
+                    function(data,status){
+                        loading.fadeOut();
+                        button.fadeOut();
+                        tampilkan.html(data);
+                        tampilkan.fadeIn(2000);
+                    });
+                    });
+                    });
+                </script>
+            ";    
+            break;
+        case ("multi-file-OLD"):
             is_array($value)?$value='':NULL;
             $i='';
             $j=$this->CI->session->userdata('i');
